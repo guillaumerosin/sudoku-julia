@@ -46,21 +46,18 @@ function print_sudoku(grid)
 end
 
 function is_valid(grid, row, col, num)
-    # Ligne
     for j in 1:9
         if grid[row, j] == num
             return false
         end
     end
 
-    # Colonne
     for i in 1:9
         if grid[i, col] == num
             return false
         end
     end
 
-    # Sous-grille 3x3
     start_row = 3 * ((row - 1) ÷ 3) + 1
     start_col = 3 * ((col - 1) ÷ 3) + 1
     for i in start_row:(start_row + 2)
@@ -74,7 +71,6 @@ function is_valid(grid, row, col, num)
     return true
 end
 
-# Trouve une case vide (0). Retourne (0, 0) s'il n'y en a plus.
 function find_empty(grid)
     for i in 1:9
         for j in 1:9
@@ -86,11 +82,10 @@ function find_empty(grid)
     return 0, 0
 end
 
-# Résout la grille par backtracking (modifie grid sur place)
 function solve_sudoku!(grid)
     row, col = find_empty(grid)
     if row == 0
-        return true  # plus de cases vides -> solution trouvée
+        return true
     end
 
     for num in shuffle(1:9)
@@ -106,14 +101,12 @@ function solve_sudoku!(grid)
     return false
 end
 
-# Génère une grille complète aléatoire
 function generate_full_grid()
     grid = empty_grid()
     solve_sudoku!(grid)
     return grid
 end
 
-# Crée un puzzle à partir d'une grille complète en enlevant des cases
 function make_puzzle(full_grid; empty_cells=45)
     puzzle = copy(full_grid)
     positions = [(i, j) for i in 1:9 for j in 1:9]
@@ -131,15 +124,13 @@ function make_puzzle(full_grid; empty_cells=45)
     return puzzle
 end
 
-# Vérifie si la grille est complètement remplie (aucun 0)
 function is_complete(grid)
     return all(grid .!= 0)
 end
 
-# Boucle de jeu pour que l'utilisateur joue au Sudoku
 function play_sudoku(initial_grid)
     grid = copy(initial_grid)
-    fixed = initial_grid .!= 0  # cases qu'on ne peut pas modifier
+    fixed = initial_grid .!= 0
 
     while true
         println()
@@ -193,7 +184,6 @@ function play_sudoku(initial_grid)
     end
 end
 
-# Interface graphique simple avec Gtk
 function run_gui(initial_grid)
     grid = copy(initial_grid)
 
@@ -212,16 +202,11 @@ function run_gui(initial_grid)
         btn = GtkButton(".")
         buttons[i, j] = btn
 
-        # Placement dans la grille (indices 1-based pour GtkGrid via setindex!)
         grid_widget[i, j] = btn
-
-        # Met l'affichage du bouton en accord avec la grille initiale
         update_button(i, j)
-
-        # Quand on clique : on fait tourner la valeur 0→1→2→...→9→0
         signal_connect(btn, "clicked") do _
             current = grid[i, j]
-            new_val = (current + 1) % 10  # 0..9
+            new_val = (current + 1) % 10
             grid[i, j] = new_val
             update_button(i, j)
         end
@@ -229,12 +214,9 @@ function run_gui(initial_grid)
 
     push!(win, grid_widget)
     showall(win)
-
-    # Lance la boucle principale Gtk (bloque jusqu'à fermeture de la fenêtre)
     Gtk.gtk_main()
 end
 
-# Fonction principale
 function main()
     println("=== Sudoku en Julia ===")
     println("1) Jouer au Sudoku d'exemple (console)")
@@ -261,5 +243,4 @@ function main()
     end
 end
 
-# Lance le programme si le fichier est exécuté
 main()

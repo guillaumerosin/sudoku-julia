@@ -1,29 +1,16 @@
 using JuMP
 import HiGHS
 
-"""
-    solve_sudoku(init_sol::AbstractMatrix{Int})
-
-Résout un Sudoku par programmation linéaire en nombres entiers (0-1).
-
-- `init_sol` : matrice 9×9 ; les chiffres 1-9 sont des cases fixées, 0 = case vide.
-- Retourne une matrice 9×9 avec la solution, ou lance une erreur si pas de solution.
-"""
 function solve_sudoku(init_sol::AbstractMatrix{Int})
     sudoku = Model(HiGHS.Optimizer)
     set_silent(sudoku)
-
-    # Variable binaire : x[i,j,k] = 1 ssi la case (i,j) contient le chiffre k
     @variable(sudoku, x[i = 1:9, j = 1:9, k = 1:9], Bin)
-
-    # Une seule valeur par case
     for i in 1:9
         for j in 1:9
             @constraint(sudoku, sum(x[i, j, k] for k in 1:9) == 1)
         end
     end
 
-    # Chaque chiffre une fois par ligne et une fois par colonne
     for ind in 1:9
         for k in 1:9
             @constraint(sudoku, sum(x[ind, j, k] for j in 1:9) == 1)
@@ -31,7 +18,6 @@ function solve_sudoku(init_sol::AbstractMatrix{Int})
         end
     end
 
-    # Chaque chiffre une fois par bloc 3×3
     for i in 1:3:7
         for j in 1:3:7
             for k in 1:9
@@ -43,7 +29,6 @@ function solve_sudoku(init_sol::AbstractMatrix{Int})
         end
     end
 
-    # Fixer les chiffres donnés
     for i in 1:9
         for j in 1:9
             if init_sol[i, j] != 0
@@ -72,11 +57,6 @@ function solve_sudoku(init_sol::AbstractMatrix{Int})
     return sol
 end
 
-"""
-    affiche_grille(M::AbstractMatrix{Int}; titre = "")
-
-Affiche une grille 9×9 de façon lisible.
-"""
 function affiche_grille(M::AbstractMatrix{Int}; titre = "")
     if !isempty(titre)
         println(titre)
@@ -98,10 +78,8 @@ function affiche_grille(M::AbstractMatrix{Int}; titre = "")
     end
 end
 
-# Ne lancer la démo que si ce fichier est exécuté directement (pas via include)
 if isdefined(Main, :PROGRAM_FILE) && !isempty(PROGRAM_FILE) &&
    endswith(basename(PROGRAM_FILE), "sudoku-julia.jl")
-    # Grille partiellement remplie du tutoriel
     init_sol = [
         5 3 0 0 7 0 0 0 0
         6 0 0 1 9 5 0 0 0

@@ -1,7 +1,3 @@
-# =============================================================================
-# GRILLE À COMPLÉTER — Modifie la matrice ci-dessous (0 = case vide, 1-9 = chiffre donné)
-# =============================================================================
-
 ma_grille = [
     5 3 0 0 7 0 0 0 0
     6 0 0 1 9 5 0 0 0
@@ -14,9 +10,51 @@ ma_grille = [
     0 0 0 0 8 0 0 7 9
 ]
 
-# =============================================================================
+function solve_sudoku(init::AbstractMatrix{Int})
+    grid = copy(init)
+    function find_empty()
+        for i in 1:9, j in 1:9
+            grid[i, j] == 0 && return i, j
+        end
+        return 0, 0
+    end
+    function is_ok(i, j, n)
+        for c in 1:9; (c != j && grid[i, c] == n) && return false; end
+        for r in 1:9; (r != i && grid[r, j] == n) && return false; end
+        r0, c0 = 3 * ((i - 1) ÷ 3) + 1, 3 * ((j - 1) ÷ 3) + 1
+        for r in r0:(r0+2), c in c0:(c0+2)
+            grid[r, c] == n && return false
+        end
+        return true
+    end
+    function solve()
+        ri, rj = find_empty()
+        ri == 0 && return true
+        for n in 1:9
+            if is_ok(ri, rj, n)
+                grid[ri, rj] = n
+                solve() && return true
+                grid[ri, rj] = 0
+            end
+        end
+        return false
+    end
+    solve() || error("Aucune solution trouvée.")
+    return grid
+end
 
-include("sudoku-julia.jl")
+function affiche_grille(M::AbstractMatrix{Int}; titre = "")
+    !isempty(titre) && (println(titre); println(repeat("─", 25)))
+    for i in 1:9
+        row = ""
+        for j in 1:9
+            row *= (M[i, j] == 0 ? "." : string(M[i, j])) * " "
+            j in (3, 6) && (row *= "│ ")
+        end
+        println(row)
+        i in (3, 6) && println("─────────────────────")
+    end
+end
 
 function affiche_grille_jeu(grille::AbstractMatrix{Int}, grille_init::AbstractMatrix{Int}; titre = "Sudoku")
     println(titre)
@@ -26,7 +64,6 @@ function affiche_grille_jeu(grille::AbstractMatrix{Int}, grille_init::AbstractMa
         for j in 1:9
             v = grille[i, j]
             s = (v == 0 ? "." : string(v))
-            # Chiffres de départ entre parenthèses
             if grille_init[i, j] != 0
                 s = "(" * s * ")"
             else
@@ -47,15 +84,12 @@ function affiche_grille_jeu(grille::AbstractMatrix{Int}, grille_init::AbstractMa
 end
 
 function est_valide(grille::AbstractMatrix{Int}, i::Int, j::Int, n::Int)::Bool
-    # Ligne
     for c in 1:9
         (c != j && grille[i, c] == n) && return false
     end
-    # Colonne
     for r in 1:9
         (r != i && grille[r, j] == n) && return false
     end
-    # Bloc 3×3
     r0 = 3 * div(i - 1, 3) + 1
     c0 = 3 * div(j - 1, 3) + 1
     for r in r0:(r0+2)
@@ -88,7 +122,6 @@ function jouer()
     while true
         affiche_grille_jeu(grille, grille_init)
         if grille_complete(grille)
-            # Vérifier que tout est valide
             ok = true
             for i in 1:9, j in 1:9
                 if !est_valide(grille, i, j, grille[i, j])

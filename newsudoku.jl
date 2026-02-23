@@ -1,10 +1,5 @@
 using Random
 
-"""
-    mutable struct Grid{T}
-        data::Matrix{T}   # 3×3 matrix
-    end
-"""
 mutable struct Grid{T}
     data::Matrix{T}
 end
@@ -22,7 +17,6 @@ function empty_sudoku()
     return Grid{Grid{Int}}(blocks)
 end
 
-# Global row,col (1-9) -> block indices (1-3) and cell indices (1-3)
 block_and_cell(row, col) = ((row - 1) ÷ 3 + 1, (col - 1) ÷ 3 + 1), ((row - 1) % 3 + 1, (col - 1) % 3 + 1)
 
 function get_cell(s::SudokuGrid, row::Int, col::Int)
@@ -35,7 +29,6 @@ function set_cell!(s::SudokuGrid, row::Int, col::Int, val::Int)
     s.data[bi, bj].data[ci, cj] = val
 end
 
-# Copy a 9×9 matrix into the Sudoku Grid structure
 function sudoku_from_matrix(M::AbstractMatrix{Int})
     @assert size(M) == (9, 9)
     s = empty_sudoku()
@@ -45,7 +38,6 @@ function sudoku_from_matrix(M::AbstractMatrix{Int})
     return s
 end
 
-# Sample Sudoku (facile) - source style: https://sudoku.com/fr/facile/
 const SAMPLE_MATRIX = [
     5 3 0 0 7 0 0 0 0;
     6 0 0 1 9 5 0 0 0;
@@ -83,17 +75,13 @@ function print_sudoku(s::SudokuGrid)
     println("+-------+-------+-------+")
 end
 
-# Check if placing num at (row, col) is valid
 function is_valid(s::SudokuGrid, row::Int, col::Int, num::Int)
-    # Row
     for j in 1:9
         get_cell(s, row, j) == num && return false
     end
-    # Column
     for i in 1:9
         get_cell(s, i, col) == num && return false
     end
-    # Block (already encoded in Grid structure)
     (bi, bj), _ = block_and_cell(row, col)
     block = s.data[bi, bj]
     for ci in 1:3, cj in 1:3
@@ -131,7 +119,6 @@ function solve_sudoku!(s::SudokuGrid)
     return false
 end
 
-# Jouer au Sudoku dans le terminal : on tape "ligne colonne valeur" à chaque coup
 function play_sudoku(initial::SudokuGrid)
     s = empty_sudoku()
     for i in 1:9, j in 1:9
@@ -182,7 +169,6 @@ function play_sudoku(initial::SudokuGrid)
     end
 end
 
-# Parse user input: 9 lines of 9 digits (0 for empty), space or comma separated
 function read_sudoku_from_input()
     println("Entrez 9 lignes de 9 chiffres (0 = vide), séparés par des espaces.")
     M = zeros(Int, 9, 9)
