@@ -1,6 +1,3 @@
-# Sudoku as a custom Grid: 3×3 matrix of blocks, each block is a Grid of 3×3 cells.
-# So Sudoku = Grid{Grid{Int}} with 81 cells total.
-
 using Random
 
 """
@@ -12,14 +9,11 @@ mutable struct Grid{T}
     data::Matrix{T}
 end
 
-# Constructor: 3×3 matrix
 Grid{T}(::UndefInitializer) where T = Grid{T}(Matrix{T}(undef, 3, 3))
 Grid(data::AbstractMatrix) = Grid{eltype(data)}(Matrix(data))
 
-# Full Sudoku type: 3×3 grid of 3×3 blocks (each block is Grid{Int})
 const SudokuGrid = Grid{Grid{Int}}
 
-# Build an empty Sudoku (9 blocks, each 3×3 of zeros)
 function empty_sudoku()
     blocks = Matrix{Grid{Int}}(undef, 3, 3)
     for i in 1:3, j in 1:3
